@@ -12,8 +12,12 @@ import '../../data/repositories/auth_repository_impl.dart';
 import '../../data/datasources/onboarding_local_datasource.dart';
 import '../../data/repositories/onboarding_repository_impl.dart';
 import '../../domain/repositories/onboarding_repository.dart';
+import '../../data/datasources/achievement_local_datasource.dart';
+import '../../data/repositories/achievement_repository_impl.dart';
+import '../../domain/repositories/achievement_repository.dart';
 import '../../src/features/Player/bloc/player_bloc.dart';
 import '../../core/services/daily_quest_service.dart';
+import '../../core/services/achievement_service.dart';
 
 /// Service locator instance
 final sl = GetIt.instance;
@@ -31,6 +35,9 @@ Future<void> init() async {
   sl.registerLazySingleton<AuthLocalDataSource>(() => AuthLocalDataSourceImpl());
   sl.registerLazySingleton<OnboardingLocalDataSource>(
     () => OnboardingLocalDataSourceImpl(),
+  );
+  sl.registerLazySingleton<AchievementLocalDataSource>(
+    () => AchievementLocalDataSourceImpl(),
   );
 
   // Repositories
@@ -50,6 +57,10 @@ Future<void> init() async {
     () => OnboardingRepositoryImpl(localDataSource: sl<OnboardingLocalDataSource>()),
   );
 
+  sl.registerLazySingleton<AchievementRepository>(
+    () => AchievementRepositoryImpl(localDataSource: sl<AchievementLocalDataSource>()),
+  );
+
   // Services
   sl.registerLazySingleton<DailyQuestService>(
     () => DailyQuestService(
@@ -58,6 +69,10 @@ Future<void> init() async {
       questDataSource: sl<QuestLocalDataSource>(),
       playerDataSource: sl<PlayerLocalDataSource>(),
     ),
+  );
+
+  sl.registerLazySingleton<AchievementService>(
+    () => AchievementService(achievementRepository: sl<AchievementRepository>()),
   );
 
   // BLoCs (Factory - new instance per screen)

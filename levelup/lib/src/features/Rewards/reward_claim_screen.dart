@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/di/injection_container.dart';
+import '../../../core/services/achievement_service.dart';
 import '../../../core/utils/result.dart';
+import '../../../domain/entities/achievement.dart';
 import '../../../domain/entities/player.dart';
+import '../../../domain/entities/quest.dart';
 import '../../../domain/repositories/player_repository.dart';
+import '../../../domain/repositories/quest_repository.dart';
 import '../../routing/app_routes.dart';
+import '../Achievements/achievement_unlock_overlay.dart';
 import '../Player/level_up_overlay.dart';
 
 class RewardArgs {
@@ -36,6 +41,7 @@ class _RewardClaimScreenState extends State<RewardClaimScreen> {
   bool _levelUp = false;
   Player? _player;
   String? _error;
+  List<Achievement> _newlyUnlockedAchievements = [];
 
   @override
   void initState() {
@@ -73,8 +79,49 @@ class _RewardClaimScreenState extends State<RewardClaimScreen> {
       _player = p;
     });
 
-    // Show level up overlay if leveled up
-    if (levelUp && p != null && mounted) {
+    // Check and unlock achievements
+    if (p != null) {
+      await _checkAchievements(p, levelUp);
+    }
+
+    // Show achievement unlock overlay first, then level up
+    if (mounted && _newlyUnlockedAchievements.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final currentPlayer = p;
+        if (_newlyUnlockedAchievements.length == 1) {
+          AchievementUnlockOverlay.show(
+            context: context,
+            achievement: _newlyUnlockedAchievements.first,
+            onDismiss: () {
+              // After achievement overlay, show level up if needed
+              if (levelUp && currentPlayer != null && mounted) {
+                LevelUpOverlay.show(
+                  context: context,
+                  newLevel: currentPlayer.level,
+                  onDismiss: () {},
+                );
+              }
+            },
+          );
+        } else {
+          AchievementUnlockOverlay.showMultiple(
+            context: context,
+            achievements: _newlyUnlockedAchievements,
+            onDismiss: () {
+              // After achievement overlay, show level up if needed
+              if (levelUp && currentPlayer != null && mounted) {
+                LevelUpOverlay.show(
+                  context: context,
+                  newLevel: currentPlayer.level,
+                  onDismiss: () {},
+                );
+              }
+            },
+          );
+        }
+      });
+    } else if (levelUp && p != null && mounted) {
+      // Show level up overlay if no achievements unlocked
       WidgetsBinding.instance.addPostFrameCallback((_) {
         LevelUpOverlay.show(
           context: context,
@@ -82,6 +129,37 @@ class _RewardClaimScreenState extends State<RewardClaimScreen> {
           onDismiss: () {},
         );
       });
+    }
+  }
+
+  Future<void> _checkAchievements(Player player, bool levelUp) async {
+    try {
+      final achievementService = sl<AchievementService>();
+      final questRepository = sl<QuestRepository>();
+      
+      // Get completed quests count
+      final questsResult = await questRepository.getQuests(status: QuestStatus.completed);
+      final completedQuestsCount = questsResult is Success<List<Quest>>
+          ? questsResult.data.length
+          : player.stats.totalQuestsCompleted;
+      
+      // Check and unlock achievements
+      final result = await achievementService.checkAndUnlockAchievements(
+        questsCompleted: completedQuestsCount,
+        level: player.level,
+        currentStreak: player.stats.currentStreak,
+        totalXP: player.experience,
+      );
+      
+      // Store newly unlocked achievements
+      if (result is Success<List<Achievement>>) {
+        setState(() {
+          _newlyUnlockedAchievements = result.data;
+        });
+      }
+    } catch (e) {
+      // Fail silently - achievement checking is not critical
+      print('Warning: Failed to check achievements: $e');
     }
   }
 

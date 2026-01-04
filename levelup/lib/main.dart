@@ -12,10 +12,20 @@ import 'src/features/Authentication/bloc/auth_event.dart';
 import 'domain/repositories/quest_repository.dart';
 import 'src/features/Quests/bloc/quest_bloc.dart';
 import 'domain/repositories/player_repository.dart';
+import 'core/services/achievement_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await di.init();
+  
+  // Initialize achievements on app startup
+  try {
+    await sl<AchievementService>().initializeAchievements();
+  } catch (e) {
+    // Fail silently - achievements will be initialized when first accessed
+    print('Warning: Failed to initialize achievements: $e');
+  }
+  
   runApp(const MyGameApp());
 }
 

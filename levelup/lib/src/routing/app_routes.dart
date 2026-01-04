@@ -8,6 +8,9 @@ class AppRoutes {
   static const String questCreate = '/quests/create';
   static const String rewardClaim = '/rewards';
   static const String profile = '/profile';
+  static const String settings = '/settings';
+  static const String statistics = '/statistics';
+  static const String achievements = '/achievements';
 }
 
 

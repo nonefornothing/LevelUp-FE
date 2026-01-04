@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/di/injection_container.dart';
 import '../../../domain/repositories/player_repository.dart';
+import '../../routing/app_routes.dart';
 import 'bloc/player_bloc.dart';
 import 'bloc/player_event.dart';
 import 'bloc/player_state.dart';
@@ -228,13 +230,30 @@ class PlayerProfileScreen extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'Statistics',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Statistics',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  TextButton.icon(
+                                    onPressed: () => context.go(AppRoutes.statistics),
+                                    icon: const Icon(
+                                      Icons.analytics,
+                                      size: 16,
+                                      color: Colors.lightBlueAccent,
+                                    ),
+                                    label: const Text(
+                                      'View Details',
+                                      style: TextStyle(color: Colors.lightBlueAccent),
+                                    ),
+                                  ),
+                                ],
                               ),
                               const SizedBox(height: 16),
                               _StatRow(
@@ -253,6 +272,53 @@ class PlayerProfileScreen extends StatelessWidget {
                                 icon: Icons.emoji_events,
                                 label: 'Longest Streak',
                                 value: '${player.stats.longestStreak} days',
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Achievements Card
+                      Card(
+                        color: Colors.grey[900],
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Achievements',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  TextButton.icon(
+                                    onPressed: () => context.go(AppRoutes.achievements),
+                                    icon: const Icon(
+                                      Icons.emoji_events,
+                                      size: 16,
+                                      color: Colors.lightBlueAccent,
+                                    ),
+                                    label: const Text(
+                                      'View All',
+                                      style: TextStyle(color: Colors.lightBlueAccent),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'View your achievements and progress',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14,
+                                ),
                               ),
                             ],
                           ),

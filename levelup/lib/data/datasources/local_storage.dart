@@ -2,6 +2,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import '../models/player_hive_models.dart';
 import '../models/quest_hive_models.dart';
+import '../models/achievement_hive_models.dart';
 
 /// Local storage interface
 abstract class LocalStorage {
@@ -15,6 +16,7 @@ class HiveLocalStorage implements LocalStorage {
   static const String questBoxName = 'quests';
   static const String playerBoxName = 'player';
   static const String prefsBoxName = 'preferences';
+  static const String achievementBoxName = 'achievements';
 
   @override
   Future<void> init() async {
@@ -26,11 +28,13 @@ class HiveLocalStorage implements LocalStorage {
     _registerAdapterIfNeeded(QuestMilestoneHiveModelAdapter());
     _registerAdapterIfNeeded(PlayerHiveModelAdapter());
     _registerAdapterIfNeeded(PlayerStatsHiveModelAdapter());
+    _registerAdapterIfNeeded(AchievementHiveModelAdapter());
 
     // Open boxes
     await Hive.openBox<QuestHiveModel>(questBoxName);
     await Hive.openBox<PlayerHiveModel>(playerBoxName);
     await Hive.openBox(prefsBoxName);
+    await Hive.openBox<AchievementHiveModel>(achievementBoxName);
   }
 
   void _registerAdapterIfNeeded<T>(TypeAdapter<T> adapter) {

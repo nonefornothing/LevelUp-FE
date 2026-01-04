@@ -10,6 +10,9 @@ import '../features/Quests/quest_detail_screen.dart';
 import '../features/Quests/quest_list_screen.dart';
 import '../features/Rewards/reward_claim_screen.dart';
 import '../features/Player/player_profile_screen.dart';
+import '../features/Settings/settings_screen.dart';
+import '../features/Statistics/statistics_screen.dart';
+import '../features/Achievements/achievements_screen.dart';
 import 'app_routes.dart';
 
 class AppRouter {
@@ -60,6 +63,18 @@ class AppRouter {
         GoRoute(
           path: AppRoutes.profile,
           builder: (context, state) => const PlayerProfileScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.settings,
+          builder: (context, state) => const SettingsScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.statistics,
+          builder: (context, state) => const StatisticsScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.achievements,
+          builder: (context, state) => const AchievementsScreen(),
         ),
       ],
     );

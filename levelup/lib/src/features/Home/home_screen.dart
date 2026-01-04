@@ -6,11 +6,10 @@ import '../../../core/di/injection_container.dart';
 import '../../../core/services/daily_quest_service.dart';
 import '../../../domain/entities/quest.dart';
 import '../../routing/app_routes.dart';
-import '../Authentication/bloc/auth_bloc.dart';
-import '../Authentication/bloc/auth_event.dart';
 import '../Player/bloc/player_bloc.dart';
 import '../Player/bloc/player_event.dart';
 import '../Player/bloc/player_state.dart';
+import 'widgets/achievement_summary_card.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -34,13 +33,10 @@ class HomeScreen extends StatelessWidget {
               tooltip: 'Profile',
             ),
             IconButton(
-              onPressed: () {
-                context.read<AuthBloc>().add(AuthLogout());
-                context.go(AppRoutes.login);
-              },
-              icon: const Icon(Icons.logout, color: Colors.white70),
-              tooltip: 'Logout',
-            )
+              onPressed: () => context.go(AppRoutes.settings),
+              icon: const Icon(Icons.settings, color: Colors.white70),
+              tooltip: 'Settings',
+            ),
           ],
         ),
         body: BlocBuilder<PlayerBloc, PlayerState>(
@@ -195,6 +191,10 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 24),
+
+                      // Achievement Summary Card
+                      const AchievementSummaryCard(),
                       const SizedBox(height: 24),
 
                       // Daily Quests Section
