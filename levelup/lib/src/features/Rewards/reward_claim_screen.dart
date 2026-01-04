@@ -1,0 +1,233 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../core/di/injection_container.dart';
+import '../../../core/utils/result.dart';
+import '../../../domain/entities/player.dart';
+import '../../../domain/repositories/player_repository.dart';
+import '../../routing/app_routes.dart';
+import '../Player/level_up_overlay.dart';
+
+class RewardArgs {
+  final String questId;
+  final String questTitle;
+  final int experience;
+  final int currency;
+
+  const RewardArgs({
+    required this.questId,
+    required this.questTitle,
+    required this.experience,
+    required this.currency,
+  });
+}
+
+class RewardClaimScreen extends StatefulWidget {
+  final RewardArgs args;
+
+  const RewardClaimScreen({super.key, required this.args});
+
+  @override
+  State<RewardClaimScreen> createState() => _RewardClaimScreenState();
+}
+
+class _RewardClaimScreenState extends State<RewardClaimScreen> {
+  bool _applied = false;
+  bool _levelUp = false;
+  Player? _player;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _applyRewards();
+  }
+
+  Future<void> _applyRewards() async {
+    if (_applied) return;
+    _applied = true;
+
+    final repo = sl<PlayerRepository>();
+
+    final xpRes = await repo.addExperience(widget.args.experience);
+    if (xpRes is ResultError<Player>) {
+      setState(() => _error = xpRes.message);
+      return;
+    }
+
+    final goldRes = await repo.addCurrency(widget.args.currency);
+    if (goldRes is ResultError<Player>) {
+      setState(() => _error = goldRes.message);
+      return;
+    }
+
+    final lvlRes = await repo.checkLevelUp();
+    final levelUp = lvlRes is Success<bool> && lvlRes.data;
+
+    final playerRes = await repo.getPlayer();
+    Player? p;
+    if (playerRes is Success<Player>) p = playerRes.data;
+
+    setState(() {
+      _levelUp = levelUp;
+      _player = p;
+    });
+
+    // Show level up overlay if leveled up
+    if (levelUp && p != null && mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        LevelUpOverlay.show(
+          context: context,
+          newLevel: p!.level,
+          onDismiss: () {},
+        );
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final args = widget.args;
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        title: const Text(
+          'Rewards',
+          style: TextStyle(color: Colors.lightBlueAccent),
+        ),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'Quest Completed!',
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.lightBlueAccent,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                args.questTitle,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white70),
+              ),
+              const SizedBox(height: 24),
+              _RewardCard(
+                title: '+${args.experience} XP',
+                subtitle: 'Experience gained',
+              ),
+              const SizedBox(height: 12),
+              _RewardCard(
+                title: '+${args.currency} Gold',
+                subtitle: 'Currency gained',
+              ),
+              const SizedBox(height: 16),
+              if (_levelUp)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 12),
+                  child: Text(
+                    'LEVEL UP!',
+                    style: TextStyle(
+                      color: Colors.greenAccent,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              if (_player != null)
+                Text(
+                  'Player: ${_player!.username} • Level ${_player!.level} • XP ${_player!.experience} • Gold ${_player!.currency}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white70),
+                ),
+              if (_error != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Text(
+                    _error!,
+                    style: const TextStyle(color: Colors.redAccent),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueAccent,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  onPressed: () => context.go(AppRoutes.home),
+                  child: const Text(
+                    'Continue',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextButton(
+                onPressed: () => context.go(AppRoutes.quests),
+                child: const Text(
+                  'Back to quests',
+                  style: TextStyle(color: Colors.lightBlueAccent),
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RewardCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+
+  const _RewardCard({required this.title, required this.subtitle});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.blueAccent),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.withOpacity(0.25),
+            blurRadius: 16,
+            spreadRadius: 2,
+          )
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: const TextStyle(color: Colors.white70),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
