@@ -19,6 +19,7 @@ class QuestHiveModel {
   final double progressPercentage;
   final DateTime createdAt;
   final DateTime? completedAt;
+  final int requiredLevel;
 
   QuestHiveModel({
     required this.id,
@@ -36,6 +37,7 @@ class QuestHiveModel {
     required this.progressPercentage,
     required this.createdAt,
     this.completedAt,
+    this.requiredLevel = 1,
   });
 
   Quest toDomain() {
@@ -58,6 +60,7 @@ class QuestHiveModel {
       progressPercentage: progressPercentage,
       createdAt: createdAt,
       completedAt: completedAt,
+      requiredLevel: requiredLevel,
     );
   }
 
@@ -202,13 +205,14 @@ class QuestHiveModelAdapter extends TypeAdapter<QuestHiveModel> {
       progressPercentage: fields[12] as double,
       createdAt: fields[13] as DateTime,
       completedAt: fields[14] as DateTime?,
+      requiredLevel: fields[15] as int? ?? 1,
     );
   }
 
   @override
   void write(BinaryWriter writer, QuestHiveModel obj) {
     writer
-      ..writeByte(15)
+      ..writeByte(16)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -238,7 +242,9 @@ class QuestHiveModelAdapter extends TypeAdapter<QuestHiveModel> {
       ..writeByte(13)
       ..write(obj.createdAt)
       ..writeByte(14)
-      ..write(obj.completedAt);
+      ..write(obj.completedAt)
+      ..writeByte(15)
+      ..write(obj.requiredLevel);
   }
 }
 

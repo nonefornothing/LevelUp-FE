@@ -11,6 +11,12 @@ class AppRoutes {
   static const String settings = '/settings';
   static const String statistics = '/statistics';
   static const String achievements = '/achievements';
+  static const String weeklyChallenges = '/weekly-challenges';
+  static const String inventory = '/inventory';
+  static const String notifications = '/notifications';
+  static const String notificationPreferences = '/notifications/preferences';
+  static const String friends = '/friends';
+  static const String questTemplates = '/quest-templates';
 }
 
 

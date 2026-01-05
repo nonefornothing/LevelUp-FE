@@ -16,6 +16,7 @@ class Quest extends Equatable {
   final double progressPercentage; // 0.0 - 100.0
   final DateTime createdAt;
   final DateTime? completedAt;
+  final int requiredLevel; // Minimum level required to unlock this quest
 
   const Quest({
     required this.id,
@@ -32,7 +33,21 @@ class Quest extends Equatable {
     required this.progressPercentage,
     required this.createdAt,
     this.completedAt,
+    this.requiredLevel = 1, // Default: available from start
   });
+
+  /// Check if quest is unlocked for a given player level
+  bool isUnlocked(int playerLevel) {
+    return playerLevel >= requiredLevel;
+  }
+
+  /// Get unlock status message
+  String getUnlockMessage(int playerLevel) {
+    if (isUnlocked(playerLevel)) {
+      return 'Available';
+    }
+    return 'Unlock at Level $requiredLevel';
+  }
 
   @override
   List<Object?> get props => [
@@ -50,6 +65,7 @@ class Quest extends Equatable {
         progressPercentage,
         createdAt,
         completedAt,
+        requiredLevel,
       ];
 }
 

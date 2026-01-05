@@ -13,6 +13,8 @@ import 'domain/repositories/quest_repository.dart';
 import 'src/features/Quests/bloc/quest_bloc.dart';
 import 'domain/repositories/player_repository.dart';
 import 'core/services/achievement_service.dart';
+import 'core/services/notification_service.dart';
+import 'core/services/quest_template_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +26,22 @@ Future<void> main() async {
   } catch (e) {
     // Fail silently - achievements will be initialized when first accessed
     print('Warning: Failed to initialize achievements: $e');
+  }
+  
+  // Schedule daily quest reminder notification
+  try {
+    await sl<NotificationService>().scheduleDailyQuestReminder();
+  } catch (e) {
+    // Fail silently - notifications will be scheduled when needed
+    print('Warning: Failed to schedule daily quest reminder: $e');
+  }
+  
+  // Initialize quest templates on app startup
+  try {
+    await sl<QuestTemplateService>().initializeTemplates();
+  } catch (e) {
+    // Fail silently - templates will be initialized when first accessed
+    print('Warning: Failed to initialize quest templates: $e');
   }
   
   runApp(const MyGameApp());

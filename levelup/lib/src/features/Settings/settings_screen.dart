@@ -190,21 +190,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             style: TextStyle(color: Colors.white),
                           ),
                           subtitle: const Text(
-                            'Manage notifications (coming soon)',
+                            'Manage notification preferences',
                             style: TextStyle(color: Colors.white70),
                           ),
                           trailing: const Icon(
                             Icons.chevron_right,
                             color: Colors.white70,
                           ),
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Notification settings coming soon!'),
-                                backgroundColor: Colors.blueAccent,
-                              ),
-                            );
-                          },
+                          onTap: () => context.go(AppRoutes.notificationPreferences),
                         ),
                       ],
                     ),

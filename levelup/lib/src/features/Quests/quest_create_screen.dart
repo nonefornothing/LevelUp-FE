@@ -64,6 +64,9 @@ class _QuestCreateScreenState extends State<QuestCreateScreen> {
       currency: _difficulty * 5,
     );
 
+    // Calculate required level based on difficulty (1-5 maps to levels 1, 2, 3, 5, 8)
+    final requiredLevel = _calculateRequiredLevel(_difficulty);
+    
     final quest = Quest(
       id: questId,
       title: title,
@@ -79,6 +82,7 @@ class _QuestCreateScreenState extends State<QuestCreateScreen> {
       progressPercentage: 0.0,
       createdAt: DateTime.now(),
       completedAt: null,
+      requiredLevel: requiredLevel,
     );
 
     final progress = QuestProgressCalculator.calculateProgress(quest);
@@ -101,6 +105,25 @@ class _QuestCreateScreenState extends State<QuestCreateScreen> {
 
     context.read<QuestBloc>().add(CreateQuestRequested(questWithProgress));
     context.pop();
+  }
+
+  /// Calculate required level based on difficulty
+  /// Difficulty 1 = Level 1, 2 = Level 2, 3 = Level 3, 4 = Level 5, 5 = Level 8
+  int _calculateRequiredLevel(int difficulty) {
+    switch (difficulty) {
+      case 1:
+        return 1;
+      case 2:
+        return 2;
+      case 3:
+        return 3;
+      case 4:
+        return 5;
+      case 5:
+        return 8;
+      default:
+        return 1;
+    }
   }
 
   @override

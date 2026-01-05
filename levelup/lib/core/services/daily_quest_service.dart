@@ -2,6 +2,7 @@ import 'package:hive/hive.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/result.dart';
+import '../../core/di/injection_container.dart';
 import '../../data/datasources/local_storage.dart';
 import '../../data/datasources/quest_local_datasource.dart';
 import '../../data/datasources/player_local_datasource.dart';
@@ -10,6 +11,7 @@ import '../../domain/entities/player.dart';
 import '../../domain/repositories/quest_repository.dart';
 import '../../domain/repositories/player_repository.dart';
 import 'daily_quest_generator.dart';
+import 'notification_service.dart';
 
 /// Service for managing daily quests
 class DailyQuestService {
@@ -81,6 +83,14 @@ class DailyQuestService {
     
     // Save generation date
     _setLastGenerationDate(today);
+    
+    // Schedule notification for new daily quests (if notification service is available)
+    try {
+      final notificationService = sl<NotificationService>();
+      await notificationService.scheduleDailyQuestReminder();
+    } catch (e) {
+      // Fail silently - notification scheduling is optional
+    }
   }
 
   DateTime _getLastGenerationDate() {

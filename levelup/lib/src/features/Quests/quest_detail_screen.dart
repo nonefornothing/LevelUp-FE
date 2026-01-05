@@ -2,10 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/di/injection_container.dart';
 import '../../../core/utils/quest_progress_calculator.dart';
 import '../../../domain/entities/quest.dart';
 import '../../routing/app_routes.dart';
+import '../Player/bloc/player_bloc.dart';
+import '../Player/bloc/player_event.dart';
+import '../Player/bloc/player_state.dart';
 import '../Rewards/reward_claim_screen.dart';
+import '../Social/bloc/social_bloc.dart';
+import '../Social/bloc/social_event.dart';
+import '../Social/bloc/social_state.dart';
 import 'bloc/quest_bloc.dart';
 import 'bloc/quest_event.dart';
 import 'bloc/quest_state.dart';
@@ -95,6 +102,17 @@ class _QuestDetailScreenState extends State<QuestDetailScreen> {
           style: TextStyle(color: Colors.lightBlueAccent),
         ),
         actions: [
+          BlocBuilder<QuestBloc, QuestState>(
+            builder: (context, state) {
+              final quest = state.selectedQuest;
+              if (quest == null) return const SizedBox.shrink();
+              return IconButton(
+                tooltip: 'Share Quest',
+                icon: const Icon(Icons.share, color: Colors.lightBlueAccent),
+                onPressed: () => _showShareQuestDialog(context, quest),
+              );
+            },
+          ),
           IconButton(
             tooltip: 'Delete',
             icon: const Icon(Icons.delete, color: Colors.redAccent),
@@ -242,7 +260,98 @@ class _QuestDetailScreenState extends State<QuestDetailScreen> {
             ],
           );
         },
+        ),
       ),
+    );
+  }
+
+  void _showShareQuestDialog(BuildContext context, Quest quest) {
+    // Get friends list
+    final socialBloc = sl<SocialBloc>();
+    socialBloc.add(const LoadFriends());
+    
+    showDialog(
+      context: context,
+      builder: (dialogContext) => BlocProvider.value(
+        value: socialBloc,
+        child: BlocBuilder<SocialBloc, SocialState>(
+          builder: (context, state) {
+            if (state is FriendsLoaded) {
+              if (state.friends.isEmpty) {
+                return AlertDialog(
+                  title: const Text('Share Quest'),
+                  content: const Text('You need to add friends first to share quests.'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(dialogContext),
+                      child: const Text('Close'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(dialogContext);
+                        Navigator.pushNamed(context, AppRoutes.friends);
+                      },
+                      child: const Text('Add Friends'),
+                    ),
+                  ],
+                );
+              }
+
+              return AlertDialog(
+                title: const Text('Share Quest'),
+                content: SizedBox(
+                  width: double.maxFinite,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: state.friends.length,
+                    itemBuilder: (context, index) {
+                      final friend = state.friends[index];
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: Colors.blue[300],
+                          child: Text(
+                            friend.username[0].toUpperCase(),
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ),
+                        title: Text(friend.username),
+                        subtitle: Text('Level ${friend.level}'),
+                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                        onTap: () {
+                          context.read<SocialBloc>().add(ShareQuest(
+                                questId: quest.id,
+                                questTitle: quest.title,
+                                friendId: friend.id,
+                              ));
+                          Navigator.pop(dialogContext);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Quest shared with ${friend.username}!'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(dialogContext),
+                    child: const Text('Cancel'),
+                  ),
+                ],
+              );
+            }
+
+            return const AlertDialog(
+              content: SizedBox(
+                height: 100,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            );
+          },
+        ),
       ),
     );
   }

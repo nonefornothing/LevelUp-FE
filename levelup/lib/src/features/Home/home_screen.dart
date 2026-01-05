@@ -4,12 +4,16 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/di/injection_container.dart';
 import '../../../core/services/daily_quest_service.dart';
+import '../../../core/services/notification_service.dart';
 import '../../../domain/entities/quest.dart';
 import '../../routing/app_routes.dart';
 import '../Player/bloc/player_bloc.dart';
 import '../Player/bloc/player_event.dart';
 import '../Player/bloc/player_state.dart';
 import 'widgets/achievement_summary_card.dart';
+import 'widgets/weekly_challenge_summary_card.dart';
+import 'widgets/recommended_quests_card.dart';
+import 'widgets/friends_summary_card.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -27,6 +31,46 @@ class HomeScreen extends StatelessWidget {
             style: TextStyle(color: Colors.lightBlueAccent),
           ),
           actions: [
+            FutureBuilder<int>(
+              future: sl<NotificationService>().getUnreadCount(),
+              builder: (context, snapshot) {
+                final unreadCount = snapshot.data ?? 0;
+                return Stack(
+                  children: [
+                    IconButton(
+                      onPressed: () => context.go(AppRoutes.notifications),
+                      icon: const Icon(Icons.notifications, color: Colors.white70),
+                      tooltip: 'Notifications',
+                    ),
+                    if (unreadCount > 0)
+                      Positioned(
+                        right: 8,
+                        top: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            unreadCount > 99 ? '99+' : unreadCount.toString(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
             IconButton(
               onPressed: () => context.go(AppRoutes.profile),
               icon: const Icon(Icons.person, color: Colors.white70),
@@ -195,7 +239,19 @@ class HomeScreen extends StatelessWidget {
 
                       // Achievement Summary Card
                       const AchievementSummaryCard(),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
+
+                      // Weekly Challenges Summary Card
+                      const WeeklyChallengeSummaryCard(),
+                      const SizedBox(height: 16),
+
+                      // Recommended Quests Card
+                      const RecommendedQuestsCard(),
+                      const SizedBox(height: 16),
+
+                      // Friends Summary Card
+                      const FriendsSummaryCard(),
+                      const SizedBox(height: 16),
 
                       // Daily Quests Section
                       FutureBuilder<List<Quest>>(

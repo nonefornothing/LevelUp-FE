@@ -15,9 +15,32 @@ import '../../domain/repositories/onboarding_repository.dart';
 import '../../data/datasources/achievement_local_datasource.dart';
 import '../../data/repositories/achievement_repository_impl.dart';
 import '../../domain/repositories/achievement_repository.dart';
+import '../../data/datasources/weekly_challenge_local_datasource.dart';
+import '../../data/repositories/weekly_challenge_repository_impl.dart';
+import '../../domain/repositories/weekly_challenge_repository.dart';
+import '../../data/datasources/inventory_local_datasource.dart';
+import '../../data/repositories/inventory_repository_impl.dart';
+import '../../domain/repositories/inventory_repository.dart';
+import '../../data/datasources/notification_local_datasource.dart';
+import '../../data/repositories/notification_repository_impl.dart';
+import '../../domain/repositories/notification_repository.dart';
+import '../../data/datasources/social_local_datasource.dart';
+import '../../data/repositories/social_repository_impl.dart';
+import '../../domain/repositories/social_repository.dart';
+import '../../data/datasources/quest_template_local_datasource.dart';
+import '../../data/repositories/quest_template_repository_impl.dart';
+import '../../domain/repositories/quest_template_repository.dart';
 import '../../src/features/Player/bloc/player_bloc.dart';
 import '../../core/services/daily_quest_service.dart';
 import '../../core/services/achievement_service.dart';
+import '../../core/services/weekly_challenge_service.dart';
+import '../../core/services/quest_recommendation_service.dart';
+import '../../core/services/inventory_service.dart';
+import '../../core/services/notification_service.dart';
+import '../../core/services/social_service.dart';
+import '../../core/services/quest_template_service.dart';
+import '../../src/features/Social/bloc/social_bloc.dart';
+import '../../src/features/QuestTemplates/bloc/quest_template_bloc.dart';
 
 /// Service locator instance
 final sl = GetIt.instance;
@@ -38,6 +61,21 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<AchievementLocalDataSource>(
     () => AchievementLocalDataSourceImpl(),
+  );
+  sl.registerLazySingleton<WeeklyChallengeLocalDataSource>(
+    () => WeeklyChallengeLocalDataSource(),
+  );
+  sl.registerLazySingleton<InventoryLocalDataSource>(
+    () => InventoryLocalDataSource(),
+  );
+  sl.registerLazySingleton<NotificationLocalDataSource>(
+    () => NotificationLocalDataSource(),
+  );
+  sl.registerLazySingleton<SocialLocalDataSource>(
+    () => SocialLocalDataSource(),
+  );
+  sl.registerLazySingleton<QuestTemplateLocalDataSource>(
+    () => QuestTemplateLocalDataSource(),
   );
 
   // Repositories
@@ -61,6 +99,26 @@ Future<void> init() async {
     () => AchievementRepositoryImpl(localDataSource: sl<AchievementLocalDataSource>()),
   );
 
+  sl.registerLazySingleton<WeeklyChallengeRepository>(
+    () => WeeklyChallengeRepositoryImpl(dataSource: sl<WeeklyChallengeLocalDataSource>()),
+  );
+
+  sl.registerLazySingleton<InventoryRepository>(
+    () => InventoryRepositoryImpl(dataSource: sl<InventoryLocalDataSource>()),
+  );
+
+  sl.registerLazySingleton<NotificationRepository>(
+    () => NotificationRepositoryImpl(dataSource: sl<NotificationLocalDataSource>()),
+  );
+
+  sl.registerLazySingleton<SocialRepository>(
+    () => SocialRepositoryImpl(sl<SocialLocalDataSource>()),
+  );
+
+  sl.registerLazySingleton<QuestTemplateRepository>(
+    () => QuestTemplateRepositoryImpl(sl<QuestTemplateLocalDataSource>()),
+  );
+
   // Services
   sl.registerLazySingleton<DailyQuestService>(
     () => DailyQuestService(
@@ -75,9 +133,59 @@ Future<void> init() async {
     () => AchievementService(achievementRepository: sl<AchievementRepository>()),
   );
 
+  sl.registerLazySingleton<WeeklyChallengeService>(
+    () => WeeklyChallengeService(
+      challengeRepository: sl<WeeklyChallengeRepository>(),
+      questRepository: sl<QuestRepository>(),
+      playerRepository: sl<PlayerRepository>(),
+    ),
+  );
+
+  sl.registerLazySingleton<QuestRecommendationService>(
+    () => QuestRecommendationService(
+      questRepository: sl<QuestRepository>(),
+      playerRepository: sl<PlayerRepository>(),
+    ),
+  );
+
+  sl.registerLazySingleton<InventoryService>(
+    () => InventoryService(
+      inventoryRepository: sl<InventoryRepository>(),
+      playerRepository: sl<PlayerRepository>(),
+    ),
+  );
+
+  sl.registerLazySingleton<NotificationService>(
+    () => NotificationService(
+      notificationRepository: sl<NotificationRepository>(),
+    ),
+  );
+
+  sl.registerLazySingleton<SocialService>(
+    () => SocialService(
+      sl<SocialRepository>(),
+      sl<PlayerRepository>(),
+    ),
+  );
+
+  sl.registerLazySingleton<QuestTemplateService>(
+    () => QuestTemplateService(
+      repository: sl<QuestTemplateRepository>(),
+      dataSource: sl<QuestTemplateLocalDataSource>(),
+    ),
+  );
+
   // BLoCs (Factory - new instance per screen)
   sl.registerFactory<PlayerBloc>(
     () => PlayerBloc(playerRepository: sl<PlayerRepository>()),
+  );
+
+  sl.registerFactory<SocialBloc>(
+    () => SocialBloc(socialService: sl<SocialService>()),
+  );
+
+  sl.registerFactory<QuestTemplateBloc>(
+    () => QuestTemplateBloc(service: sl<QuestTemplateService>()),
   );
 
   // TODO: Register use cases

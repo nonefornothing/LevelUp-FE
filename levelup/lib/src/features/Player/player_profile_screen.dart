@@ -279,6 +279,41 @@ class PlayerProfileScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 24),
 
+                      // Inventory Card
+                      Card(
+                        color: Colors.grey[900],
+                        child: ListTile(
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.purple.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.inventory_2,
+                              color: Colors.purple,
+                            ),
+                          ),
+                          title: const Text(
+                            'Inventory',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          subtitle: const Text(
+                            'View your items and collectibles',
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                          trailing: const Icon(
+                            Icons.chevron_right,
+                            color: Colors.white70,
+                          ),
+                          onTap: () => context.go(AppRoutes.inventory),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
                       // Achievements Card
                       Card(
                         color: Colors.grey[900],

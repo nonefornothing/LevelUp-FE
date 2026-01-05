@@ -3,6 +3,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/di/injection_container.dart';
 import '../../../core/services/achievement_service.dart';
+import '../../../core/services/weekly_challenge_service.dart';
+import '../../../core/services/inventory_service.dart';
+import '../../../core/services/notification_service.dart';
 import '../../../core/utils/result.dart';
 import '../../../domain/entities/achievement.dart';
 import '../../../domain/entities/player.dart';
@@ -84,6 +87,15 @@ class _RewardClaimScreenState extends State<RewardClaimScreen> {
       await _checkAchievements(p, levelUp);
     }
 
+    // Update weekly challenge progress
+    await _updateWeeklyChallenges(levelUp);
+
+    // Award items based on quest completion (random chance for collectibles)
+    await _awardItems(levelUp);
+
+    // Create notifications
+    await _createNotifications(p, levelUp);
+
     // Show achievement unlock overlay first, then level up
     if (mounted && _newlyUnlockedAchievements.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -156,10 +168,83 @@ class _RewardClaimScreenState extends State<RewardClaimScreen> {
         setState(() {
           _newlyUnlockedAchievements = result.data;
         });
+        
+        // Create notifications for unlocked achievements
+        final notificationService = sl<NotificationService>();
+        for (final achievement in result.data) {
+          await notificationService.notifyAchievementUnlock(achievement.title);
+        }
       }
     } catch (e) {
       // Fail silently - achievement checking is not critical
       print('Warning: Failed to check achievements: $e');
+    }
+  }
+
+  Future<void> _updateWeeklyChallenges(bool levelUp) async {
+    try {
+      final weeklyChallengeService = sl<WeeklyChallengeService>();
+      final questRepository = sl<QuestRepository>();
+      
+      // Get the completed quest
+      final questResult = await questRepository.getQuestById(widget.args.questId);
+      if (questResult is Success<Quest>) {
+        final quest = questResult.data;
+        // Update challenge progress for quest completion
+        await weeklyChallengeService.onQuestCompleted(quest);
+      }
+      
+      // Update challenge progress for XP earned
+      await weeklyChallengeService.onXPEarned(widget.args.experience);
+      
+      // Update challenge progress for level up
+      if (levelUp) {
+        await weeklyChallengeService.onLevelUp();
+      }
+    } catch (e) {
+      // Fail silently - weekly challenge tracking is not critical
+      print('Warning: Failed to update weekly challenges: $e');
+    }
+  }
+
+  Future<void> _awardItems(bool levelUp) async {
+    try {
+      final inventoryService = sl<InventoryService>();
+      
+      // Award collectible items based on milestones
+      final playerResult = await sl<PlayerRepository>().getPlayer();
+      if (playerResult is Success<Player>) {
+        final player = playerResult.data;
+        
+        // Award first quest badge if this is the first quest
+        if (player.stats.totalQuestsCompleted == 1) {
+          await inventoryService.addItemById('item_badge_first_quest');
+        }
+        
+        // Award trophies based on quest count
+        if (player.stats.totalQuestsCompleted == 10) {
+          await inventoryService.addItemById('item_trophy_bronze');
+        } else if (player.stats.totalQuestsCompleted == 50) {
+          await inventoryService.addItemById('item_trophy_silver');
+        } else if (player.stats.totalQuestsCompleted == 100) {
+          await inventoryService.addItemById('item_trophy_gold');
+        }
+        
+        // Award level badges
+        if (player.level == 10) {
+          await inventoryService.addItemById('item_badge_level_10');
+        }
+        
+        // Random chance for consumable items (10% chance)
+        final random = DateTime.now().millisecondsSinceEpoch % 100;
+        if (random < 10) {
+          // Award a small XP boost
+          await inventoryService.addItemById('item_xp_boost_small');
+        }
+      }
+    } catch (e) {
+      // Fail silently - item rewards are bonus
+      print('Warning: Failed to award items: $e');
     }
   }
 

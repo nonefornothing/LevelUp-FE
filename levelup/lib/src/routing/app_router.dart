@@ -13,6 +13,12 @@ import '../features/Player/player_profile_screen.dart';
 import '../features/Settings/settings_screen.dart';
 import '../features/Statistics/statistics_screen.dart';
 import '../features/Achievements/achievements_screen.dart';
+import '../features/WeeklyChallenges/weekly_challenges_screen.dart';
+import '../features/Inventory/inventory_screen.dart';
+import '../features/Notifications/notifications_screen.dart';
+import '../features/Notifications/notification_preferences_screen.dart';
+import '../features/Social/friends_screen.dart';
+import '../features/QuestTemplates/quest_templates_screen.dart';
 import 'app_routes.dart';
 
 class AppRouter {
@@ -75,6 +81,30 @@ class AppRouter {
         GoRoute(
           path: AppRoutes.achievements,
           builder: (context, state) => const AchievementsScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.weeklyChallenges,
+          builder: (context, state) => const WeeklyChallengesScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.inventory,
+          builder: (context, state) => const InventoryScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.notifications,
+          builder: (context, state) => const NotificationsScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.notificationPreferences,
+          builder: (context, state) => const NotificationPreferencesScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.friends,
+          builder: (context, state) => const FriendsScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.questTemplates,
+          builder: (context, state) => const QuestTemplatesScreen(),
         ),
       ],
     );
