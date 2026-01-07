@@ -132,6 +132,9 @@ class PlayerRepositoryImpl implements PlayerRepository {
         return const Success(false);
       }
 
+      // Award 1 skill point per level up
+      final newSkillPoints = current.availableSkillPoints + 1;
+      
       final leveled = Player(
         id: current.id,
         username: current.username,
@@ -139,6 +142,7 @@ class PlayerRepositoryImpl implements PlayerRepository {
         level: current.level + 1,
         experience: current.experience,
         currency: current.currency,
+        availableSkillPoints: newSkillPoints,
         stats: current.stats,
         createdAt: current.createdAt,
         lastActiveAt: DateTime.now(),

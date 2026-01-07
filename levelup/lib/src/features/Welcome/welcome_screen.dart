@@ -11,7 +11,7 @@ class WelcomeScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
+            const Text(
               'Welcome to the Game!',
               style: TextStyle(
                 fontSize: 28,
@@ -19,16 +19,16 @@ class WelcomeScreen extends StatelessWidget {
                 color: Colors.lightBlueAccent,
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blueAccent,
-                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
               ),
               onPressed: () {
                 // Handle navigation to the game
               },
-              child: Text(
+              child: const Text(
                 'Enter the Game',
                 style: TextStyle(
                   fontSize: 18,

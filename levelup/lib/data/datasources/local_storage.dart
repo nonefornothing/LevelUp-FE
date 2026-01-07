@@ -8,6 +8,8 @@ import '../models/item_hive_models.dart';
 import '../models/notification_hive_models.dart';
 import '../models/friend_hive_models.dart';
 import '../models/quest_template_hive_models.dart';
+import '../models/streak_hive_models.dart';
+import '../models/skill_hive_models.dart';
 
 /// Local storage interface
 abstract class LocalStorage {
@@ -30,6 +32,8 @@ class HiveLocalStorage implements LocalStorage {
   static const String friendRequestsBoxName = 'friend_requests';
   static const String sharedQuestsBoxName = 'shared_quests';
   static const String questTemplatesBoxName = 'quest_templates';
+  static const String streakBoxName = 'streaks';
+  static const String skillBoxName = 'skills';
 
   @override
   Future<void> init() async {
@@ -54,6 +58,8 @@ class HiveLocalStorage implements LocalStorage {
     _registerAdapterIfNeeded(QuestTemplateHiveModelAdapter());
     _registerAdapterIfNeeded(QuestTemplateTaskHiveModelAdapter());
     _registerAdapterIfNeeded(QuestTemplateMilestoneHiveModelAdapter());
+    _registerAdapterIfNeeded(StreakHiveModelAdapter());
+    _registerAdapterIfNeeded(SkillHiveModelAdapter());
 
     // Open boxes
     await Hive.openBox<QuestHiveModel>(questBoxName);
@@ -68,6 +74,8 @@ class HiveLocalStorage implements LocalStorage {
     await Hive.openBox<FriendRequestHiveModel>(friendRequestsBoxName);
     await Hive.openBox<SharedQuestHiveModel>(sharedQuestsBoxName);
     await Hive.openBox<QuestTemplateHiveModel>(questTemplatesBoxName);
+    await Hive.openBox<StreakHiveModel>(streakBoxName);
+    await Hive.openBox<SkillHiveModel>(skillBoxName);
   }
 
   void _registerAdapterIfNeeded<T>(TypeAdapter<T> adapter) {

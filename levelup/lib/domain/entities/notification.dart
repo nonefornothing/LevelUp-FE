@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart' as material;
 
 /// Notification entity (Domain layer)
 class AppNotification extends Equatable {
@@ -170,13 +171,15 @@ class CustomTimeOfDay extends Equatable {
   }
   
   /// Convert from Flutter's TimeOfDay
-  factory CustomTimeOfDay.fromFlutterTimeOfDay(TimeOfDay timeOfDay) {
+  factory CustomTimeOfDay.fromFlutterTimeOfDay(
+    material.TimeOfDay timeOfDay,
+  ) {
     return CustomTimeOfDay(hour: timeOfDay.hour, minute: timeOfDay.minute);
   }
   
   /// Convert to Flutter's TimeOfDay
-  TimeOfDay toFlutterTimeOfDay() {
-    return TimeOfDay(hour: hour, minute: minute);
+  material.TimeOfDay toFlutterTimeOfDay() {
+    return material.TimeOfDay(hour: hour, minute: minute);
   }
 }
 

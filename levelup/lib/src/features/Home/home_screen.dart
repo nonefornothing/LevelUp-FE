@@ -7,6 +7,8 @@ import '../../../core/services/daily_quest_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../domain/entities/quest.dart';
 import '../../routing/app_routes.dart';
+import '../../core/widgets/error_state_widget.dart';
+import '../../core/widgets/loading_widget.dart';
 import '../Player/bloc/player_bloc.dart';
 import '../Player/bloc/player_event.dart';
 import '../Player/bloc/player_state.dart';
@@ -14,6 +16,7 @@ import 'widgets/achievement_summary_card.dart';
 import 'widgets/weekly_challenge_summary_card.dart';
 import 'widgets/recommended_quests_card.dart';
 import 'widgets/friends_summary_card.dart';
+import 'widgets/streak_summary_card.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -86,37 +89,14 @@ class HomeScreen extends StatelessWidget {
         body: BlocBuilder<PlayerBloc, PlayerState>(
           builder: (context, state) {
             if (state is PlayerLoading) {
-              return const Center(
-                child: CircularProgressIndicator(
-                  color: Colors.lightBlueAccent,
-                ),
-              );
+              return const LoadingWidget(message: 'Loading your progress...');
             }
 
             if (state is PlayerError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      color: Colors.red,
-                      size: 48,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      state.message,
-                      style: const TextStyle(color: Colors.white70),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        context.read<PlayerBloc>().add(const PlayerLoadRequested());
-                      },
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
+              return ErrorStateWidget(
+                message: 'Failed to load player data',
+                details: state.message,
+                onRetry: () => context.read<PlayerBloc>().add(const PlayerLoadRequested()),
               );
             }
 
@@ -251,6 +231,10 @@ class HomeScreen extends StatelessWidget {
 
                       // Friends Summary Card
                       const FriendsSummaryCard(),
+                      const SizedBox(height: 16),
+
+                      // Streak Summary Card
+                      const StreakSummaryCard(),
                       const SizedBox(height: 16),
 
                       // Daily Quests Section

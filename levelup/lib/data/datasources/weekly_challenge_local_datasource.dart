@@ -61,11 +61,5 @@ class WeeklyChallengeLocalDataSource {
     return DateTime(date.year, date.month, date.day).subtract(Duration(days: daysFromMonday));
   }
 
-  /// Get week end (Sunday)
-  DateTime _getWeekEnd(DateTime date) {
-    final weekday = date.weekday;
-    final daysToSunday = weekday == 7 ? 0 : 7 - weekday;
-    return DateTime(date.year, date.month, date.day, 23, 59, 59).add(Duration(days: daysToSunday));
-  }
 }
 

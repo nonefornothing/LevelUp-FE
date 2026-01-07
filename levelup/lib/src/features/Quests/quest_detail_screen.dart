@@ -4,11 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/di/injection_container.dart';
 import '../../../core/utils/quest_progress_calculator.dart';
+import '../../../core/utils/snackbar_helper.dart';
 import '../../../domain/entities/quest.dart';
 import '../../routing/app_routes.dart';
-import '../Player/bloc/player_bloc.dart';
-import '../Player/bloc/player_event.dart';
-import '../Player/bloc/player_state.dart';
 import '../Rewards/reward_claim_screen.dart';
 import '../Social/bloc/social_bloc.dart';
 import '../Social/bloc/social_event.dart';
@@ -117,8 +115,7 @@ class _QuestDetailScreenState extends State<QuestDetailScreen> {
             tooltip: 'Delete',
             icon: const Icon(Icons.delete, color: Colors.redAccent),
             onPressed: () {
-              context.read<QuestBloc>().add(DeleteQuestRequested(widget.questId));
-              Navigator.of(context).pop();
+              _showDeleteConfirmation(context);
             },
           )
         ],
@@ -352,6 +349,44 @@ class _QuestDetailScreenState extends State<QuestDetailScreen> {
             );
           },
         ),
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: const Text(
+          'Delete Quest',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: const Text(
+          'Are you sure you want to delete this quest? This action cannot be undone.',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.lightBlueAccent),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              context.read<QuestBloc>().add(DeleteQuestRequested(widget.questId));
+              Navigator.pop(dialogContext);
+              Navigator.of(context).pop();
+              SnackbarHelper.showInfo(context, 'Quest deleted successfully');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
       ),
     );
   }

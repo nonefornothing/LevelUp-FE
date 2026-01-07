@@ -4,6 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/di/injection_container.dart';
 import '../../../domain/entities/achievement.dart';
 import '../../../domain/repositories/achievement_repository.dart';
+import '../../core/widgets/empty_state_widget.dart';
+import '../../core/widgets/error_state_widget.dart';
+import '../../core/widgets/loading_widget.dart';
 import 'bloc/achievement_bloc.dart';
 import 'bloc/achievement_event.dart';
 import 'bloc/achievement_state.dart';
@@ -29,37 +32,22 @@ class AchievementsScreen extends StatelessWidget {
         body: BlocBuilder<AchievementBloc, AchievementState>(
           builder: (context, state) {
             if (state.loading && state.achievements.isEmpty) {
-              return const Center(
-                child: CircularProgressIndicator(
-                  color: Colors.lightBlueAccent,
-                ),
-              );
+              return const LoadingWidget(message: 'Loading achievements...');
             }
 
             if (state.error != null && state.achievements.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      color: Colors.red,
-                      size: 48,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      state.error!,
-                      style: const TextStyle(color: Colors.white70),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        context.read<AchievementBloc>().add(const LoadAchievements());
-                      },
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
+              return ErrorStateWidget(
+                message: 'Failed to load achievements',
+                details: state.error,
+                onRetry: () => context.read<AchievementBloc>().add(const LoadAchievements()),
+              );
+            }
+
+            if (state.achievements.isEmpty) {
+              return const EmptyStateWidget(
+                icon: Icons.emoji_events_outlined,
+                title: 'No achievements yet',
+                message: 'Complete quests to unlock achievements and track your progress!',
               );
             }
 

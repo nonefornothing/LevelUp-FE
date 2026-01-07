@@ -8,6 +8,7 @@ class Player extends Equatable {
   final int level;
   final int experience;
   final int currency;
+  final int availableSkillPoints; // Skill points available to allocate
   final PlayerStats stats;
   final DateTime createdAt;
   final DateTime? lastActiveAt;
@@ -19,6 +20,7 @@ class Player extends Equatable {
     required this.level,
     required this.experience,
     required this.currency,
+    this.availableSkillPoints = 0,
     required this.stats,
     required this.createdAt,
     this.lastActiveAt,
@@ -41,6 +43,32 @@ class Player extends Equatable {
     return (currentLevelXP / xpNeeded * 100).clamp(0.0, 100.0);
   }
 
+  Player copyWith({
+    String? id,
+    String? username,
+    String? email,
+    int? level,
+    int? experience,
+    int? currency,
+    int? availableSkillPoints,
+    PlayerStats? stats,
+    DateTime? createdAt,
+    DateTime? lastActiveAt,
+  }) {
+    return Player(
+      id: id ?? this.id,
+      username: username ?? this.username,
+      email: email ?? this.email,
+      level: level ?? this.level,
+      experience: experience ?? this.experience,
+      currency: currency ?? this.currency,
+      availableSkillPoints: availableSkillPoints ?? this.availableSkillPoints,
+      stats: stats ?? this.stats,
+      createdAt: createdAt ?? this.createdAt,
+      lastActiveAt: lastActiveAt ?? this.lastActiveAt,
+    );
+  }
+
   @override
   List<Object?> get props => [
         id,
@@ -49,6 +77,7 @@ class Player extends Equatable {
         level,
         experience,
         currency,
+        availableSkillPoints,
         stats,
         createdAt,
         lastActiveAt,

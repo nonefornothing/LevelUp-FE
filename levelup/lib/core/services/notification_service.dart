@@ -2,14 +2,18 @@ import '../../core/utils/id_generator.dart';
 import '../../domain/entities/notification.dart';
 import '../../domain/repositories/notification_repository.dart';
 import '../../core/utils/result.dart';
+import 'local_notification_service.dart';
 
 /// Service for managing notifications
 class NotificationService {
   final NotificationRepository _notificationRepository;
+  final LocalNotificationService _localNotificationService;
 
   NotificationService({
     required NotificationRepository notificationRepository,
-  }) : _notificationRepository = notificationRepository;
+    LocalNotificationService? localNotificationService,
+  })  : _notificationRepository = notificationRepository,
+        _localNotificationService = localNotificationService ?? LocalNotificationService();
 
   /// Create a notification for quest completion
   Future<void> notifyQuestCompletion(String questTitle, int xpGained, int currencyGained) async {
@@ -32,6 +36,18 @@ class NotificationService {
     );
 
     await _notificationRepository.createNotification(notification);
+    
+    // Show actual system notification
+    final notificationId = notification.id.hashCode;
+    await _localNotificationService.showNotification(
+      id: notificationId,
+      title: notification.title,
+      body: notification.body,
+      payload: notification.payload.toString(),
+    );
+    
+    // Mark as delivered
+    await _notificationRepository.markAsDelivered(notification.id);
   }
 
   /// Create a notification for level up
@@ -55,6 +71,18 @@ class NotificationService {
     );
 
     await _notificationRepository.createNotification(notification);
+    
+    // Show actual system notification
+    final notificationId = notification.id.hashCode;
+    await _localNotificationService.showNotification(
+      id: notificationId,
+      title: notification.title,
+      body: notification.body,
+      payload: notification.payload.toString(),
+    );
+    
+    // Mark as delivered
+    await _notificationRepository.markAsDelivered(notification.id);
   }
 
   /// Create a notification for achievement unlock
@@ -78,6 +106,18 @@ class NotificationService {
     );
 
     await _notificationRepository.createNotification(notification);
+    
+    // Show actual system notification
+    final notificationId = notification.id.hashCode;
+    await _localNotificationService.showNotification(
+      id: notificationId,
+      title: notification.title,
+      body: notification.body,
+      payload: notification.payload.toString(),
+    );
+    
+    // Mark as delivered
+    await _notificationRepository.markAsDelivered(notification.id);
   }
 
   /// Schedule daily quest reminder
@@ -112,6 +152,16 @@ class NotificationService {
     );
 
     await _notificationRepository.createNotification(notification);
+    
+    // Schedule actual system notification (not immediate)
+    final notificationId = notification.id.hashCode;
+    await _localNotificationService.scheduleNotification(
+      id: notificationId,
+      title: notification.title,
+      body: notification.body,
+      scheduledDate: finalScheduledTime,
+      payload: notification.payload.toString(),
+    );
   }
 
   /// Create a notification for streak reminder
@@ -135,6 +185,18 @@ class NotificationService {
     );
 
     await _notificationRepository.createNotification(notification);
+    
+    // Show actual system notification
+    final notificationId = notification.id.hashCode;
+    await _localNotificationService.showNotification(
+      id: notificationId,
+      title: notification.title,
+      body: notification.body,
+      payload: notification.payload.toString(),
+    );
+    
+    // Mark as delivered
+    await _notificationRepository.markAsDelivered(notification.id);
   }
 
   /// Create a notification for weekly challenge
@@ -158,6 +220,18 @@ class NotificationService {
     );
 
     await _notificationRepository.createNotification(notification);
+    
+    // Show actual system notification
+    final notificationId = notification.id.hashCode;
+    await _localNotificationService.showNotification(
+      id: notificationId,
+      title: notification.title,
+      body: notification.body,
+      payload: notification.payload.toString(),
+    );
+    
+    // Mark as delivered
+    await _notificationRepository.markAsDelivered(notification.id);
   }
 
   /// Get unread notification count

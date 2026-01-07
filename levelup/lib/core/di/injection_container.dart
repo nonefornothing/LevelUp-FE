@@ -30,6 +30,9 @@ import '../../domain/repositories/social_repository.dart';
 import '../../data/datasources/quest_template_local_datasource.dart';
 import '../../data/repositories/quest_template_repository_impl.dart';
 import '../../domain/repositories/quest_template_repository.dart';
+import '../../data/datasources/streak_local_datasource.dart';
+import '../../data/repositories/streak_repository_impl.dart';
+import '../../domain/repositories/streak_repository.dart';
 import '../../src/features/Player/bloc/player_bloc.dart';
 import '../../core/services/daily_quest_service.dart';
 import '../../core/services/achievement_service.dart';
@@ -39,8 +42,16 @@ import '../../core/services/inventory_service.dart';
 import '../../core/services/notification_service.dart';
 import '../../core/services/social_service.dart';
 import '../../core/services/quest_template_service.dart';
+import '../../core/services/streak_service.dart';
+import '../../core/services/skill_service.dart';
+import '../../core/services/local_notification_service.dart';
 import '../../src/features/Social/bloc/social_bloc.dart';
 import '../../src/features/QuestTemplates/bloc/quest_template_bloc.dart';
+import '../../src/features/Streaks/bloc/streak_bloc.dart';
+import '../../src/features/Skills/bloc/skill_bloc.dart';
+import '../../data/datasources/skill_local_datasource.dart';
+import '../../data/repositories/skill_repository_impl.dart';
+import '../../domain/repositories/skill_repository.dart';
 
 /// Service locator instance
 final sl = GetIt.instance;
@@ -76,6 +87,12 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<QuestTemplateLocalDataSource>(
     () => QuestTemplateLocalDataSource(),
+  );
+  sl.registerLazySingleton<StreakLocalDataSource>(
+    () => StreakLocalDataSource(),
+  );
+  sl.registerLazySingleton<SkillLocalDataSource>(
+    () => SkillLocalDataSource(),
   );
 
   // Repositories
@@ -119,6 +136,14 @@ Future<void> init() async {
     () => QuestTemplateRepositoryImpl(sl<QuestTemplateLocalDataSource>()),
   );
 
+  sl.registerLazySingleton<StreakRepository>(
+    () => StreakRepositoryImpl(localDataSource: sl<StreakLocalDataSource>()),
+  );
+
+  sl.registerLazySingleton<SkillRepository>(
+    () => SkillRepositoryImpl(localDataSource: sl<SkillLocalDataSource>()),
+  );
+
   // Services
   sl.registerLazySingleton<DailyQuestService>(
     () => DailyQuestService(
@@ -155,9 +180,14 @@ Future<void> init() async {
     ),
   );
 
+  sl.registerLazySingleton<LocalNotificationService>(
+    () => LocalNotificationService(),
+  );
+
   sl.registerLazySingleton<NotificationService>(
     () => NotificationService(
       notificationRepository: sl<NotificationRepository>(),
+      localNotificationService: sl<LocalNotificationService>(),
     ),
   );
 
@@ -175,6 +205,14 @@ Future<void> init() async {
     ),
   );
 
+  sl.registerLazySingleton<StreakService>(
+    () => StreakService(streakRepository: sl<StreakRepository>()),
+  );
+
+  sl.registerLazySingleton<SkillService>(
+    () => SkillService(skillRepository: sl<SkillRepository>()),
+  );
+
   // BLoCs (Factory - new instance per screen)
   sl.registerFactory<PlayerBloc>(
     () => PlayerBloc(playerRepository: sl<PlayerRepository>()),
@@ -186,6 +224,14 @@ Future<void> init() async {
 
   sl.registerFactory<QuestTemplateBloc>(
     () => QuestTemplateBloc(service: sl<QuestTemplateService>()),
+  );
+
+  sl.registerFactory<StreakBloc>(
+    () => StreakBloc(streakService: sl<StreakService>()),
+  );
+
+  sl.registerFactory<SkillBloc>(
+    () => SkillBloc(skillRepository: sl<SkillRepository>()),
   );
 
   // TODO: Register use cases

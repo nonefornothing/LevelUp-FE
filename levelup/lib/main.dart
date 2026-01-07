@@ -15,36 +15,65 @@ import 'domain/repositories/player_repository.dart';
 import 'core/services/achievement_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/quest_template_service.dart';
+import 'core/services/skill_service.dart';
+import 'core/services/local_notification_service.dart';
+import 'core/utils/logger.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize dependency injection first (required for app to run)
   await di.init();
   
-  // Initialize achievements on app startup
+  // Initialize local notifications early (needed for scheduling)
   try {
-    await sl<AchievementService>().initializeAchievements();
+    final localNotificationService = LocalNotificationService();
+    await localNotificationService.initialize();
+    await localNotificationService.requestPermissions();
   } catch (e) {
-    // Fail silently - achievements will be initialized when first accessed
-    print('Warning: Failed to initialize achievements: $e');
+    Logger.warning('Failed to initialize local notifications: $e');
   }
   
-  // Schedule daily quest reminder notification
-  try {
-    await sl<NotificationService>().scheduleDailyQuestReminder();
-  } catch (e) {
-    // Fail silently - notifications will be scheduled when needed
-    print('Warning: Failed to schedule daily quest reminder: $e');
-  }
-  
-  // Initialize quest templates on app startup
-  try {
-    await sl<QuestTemplateService>().initializeTemplates();
-  } catch (e) {
-    // Fail silently - templates will be initialized when first accessed
-    print('Warning: Failed to initialize quest templates: $e');
-  }
-  
+  // Run app immediately - don't block startup
   runApp(const MyGameApp());
+  
+  // Initialize non-critical services in background after app starts
+  _initializeBackgroundServices();
+}
+
+/// Initialize non-critical services in the background
+/// This prevents blocking app startup
+Future<void> _initializeBackgroundServices() async {
+  // Use a microtask to ensure this runs after the app is built
+  await Future.microtask(() async {
+    try {
+      // Initialize achievements in background
+      await sl<AchievementService>().initializeAchievements();
+    } catch (e) {
+      Logger.warning('Failed to initialize achievements: $e');
+    }
+    
+    try {
+      // Schedule daily quest reminder notification
+      await sl<NotificationService>().scheduleDailyQuestReminder();
+    } catch (e) {
+      Logger.warning('Failed to schedule daily quest reminder: $e');
+    }
+    
+    try {
+      // Initialize quest templates in background
+      await sl<QuestTemplateService>().initializeTemplates();
+    } catch (e) {
+      Logger.warning('Failed to initialize quest templates: $e');
+    }
+    
+    try {
+      // Initialize skills in background
+      await sl<SkillService>().initializeSkills();
+    } catch (e) {
+      Logger.warning('Failed to initialize skills: $e');
+    }
+  });
 }
 
 class MyGameApp extends StatelessWidget {

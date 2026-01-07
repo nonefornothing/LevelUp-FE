@@ -9,6 +9,7 @@ class PlayerHiveModel {
   final int level;
   final int experience;
   final int currency;
+  final int availableSkillPoints;
   final PlayerStatsHiveModel stats;
   final DateTime createdAt;
   final DateTime? lastActiveAt;
@@ -20,6 +21,7 @@ class PlayerHiveModel {
     required this.level,
     required this.experience,
     required this.currency,
+    this.availableSkillPoints = 0,
     required this.stats,
     required this.createdAt,
     this.lastActiveAt,
@@ -32,6 +34,7 @@ class PlayerHiveModel {
         level: level,
         experience: experience,
         currency: currency,
+        availableSkillPoints: availableSkillPoints,
         stats: stats.toDomain(),
         createdAt: createdAt,
         lastActiveAt: lastActiveAt,
@@ -44,6 +47,7 @@ class PlayerHiveModel {
         level: player.level,
         experience: player.experience,
         currency: player.currency,
+        availableSkillPoints: player.availableSkillPoints,
         stats: PlayerStatsHiveModel.fromDomain(player.stats),
         createdAt: player.createdAt,
         lastActiveAt: player.lastActiveAt,
@@ -100,6 +104,7 @@ class PlayerHiveModelAdapter extends TypeAdapter<PlayerHiveModel> {
       level: fields[3] as int,
       experience: fields[4] as int,
       currency: fields[5] as int,
+      availableSkillPoints: fields[9] as int? ?? 0,
       stats: fields[6] as PlayerStatsHiveModel,
       createdAt: fields[7] as DateTime,
       lastActiveAt: fields[8] as DateTime?,
@@ -109,7 +114,7 @@ class PlayerHiveModelAdapter extends TypeAdapter<PlayerHiveModel> {
   @override
   void write(BinaryWriter writer, PlayerHiveModel obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -127,7 +132,9 @@ class PlayerHiveModelAdapter extends TypeAdapter<PlayerHiveModel> {
       ..writeByte(7)
       ..write(obj.createdAt)
       ..writeByte(8)
-      ..write(obj.lastActiveAt);
+      ..write(obj.lastActiveAt)
+      ..writeByte(9)
+      ..write(obj.availableSkillPoints);
   }
 }
 

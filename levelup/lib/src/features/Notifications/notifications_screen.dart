@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../domain/entities/notification.dart';
+import '../../core/widgets/empty_state_widget.dart';
+import '../../core/widgets/error_state_widget.dart';
+import '../../core/widgets/loading_widget.dart';
 import 'bloc/notification_bloc.dart';
 import 'bloc/notification_event.dart';
 import 'bloc/notification_state.dart';
@@ -76,63 +79,25 @@ class NotificationsScreen extends StatelessWidget {
         body: BlocBuilder<NotificationBloc, NotificationState>(
           builder: (context, state) {
             if (state is NotificationLoading) {
-              return const Center(
-                child: CircularProgressIndicator(
-                  color: Colors.lightBlueAccent,
-                ),
-              );
+              return const LoadingWidget(message: 'Loading notifications...');
             }
 
             if (state is NotificationError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      color: Colors.red,
-                      size: 48,
+              return ErrorStateWidget(
+                message: 'Failed to load notifications',
+                details: state.message,
+                onRetry: () => context.read<NotificationBloc>().add(
+                      const NotificationLoadRequested(),
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      state.message,
-                      style: const TextStyle(color: Colors.white70),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        context.read<NotificationBloc>().add(
-                              const NotificationLoadRequested(),
-                            );
-                      },
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
               );
             }
 
             if (state is NotificationLoaded) {
               if (state.notifications.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.notifications_none,
-                        size: 64,
-                        color: Colors.grey[600],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'No notifications',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
+                return const EmptyStateWidget(
+                  icon: Icons.notifications_none,
+                  title: 'No notifications',
+                  message: 'You\'re all caught up! New notifications will appear here.',
                 );
               }
 

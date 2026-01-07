@@ -4,7 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/di/injection_container.dart';
 import '../../../core/services/quest_recommendation_service.dart';
+import '../../../core/utils/logger.dart';
 import '../../routing/app_routes.dart';
+import '../../core/widgets/empty_state_widget.dart';
+import '../../core/widgets/error_state_widget.dart';
+import '../../core/widgets/loading_widget.dart';
 import '../Player/bloc/player_bloc.dart';
 import '../Player/bloc/player_event.dart';
 import '../Player/bloc/player_state.dart';
@@ -53,39 +57,24 @@ class _QuestListScreenState extends State<QuestListScreen> {
       body: BlocBuilder<QuestBloc, QuestState>(
         builder: (context, state) {
           if (state.loading && state.quests.isEmpty) {
-            return const Center(
-              child: CircularProgressIndicator(color: Colors.lightBlueAccent),
-            );
+            return const LoadingWidget(message: 'Loading quests...');
           }
 
           if (state.error != null && state.quests.isEmpty) {
-            return Center(
-              child: Text(
-                state.error!,
-                style: const TextStyle(color: Colors.redAccent),
-              ),
+            return ErrorStateWidget(
+              message: 'Failed to load quests',
+              details: state.error,
+              onRetry: () => context.read<QuestBloc>().add(LoadQuests()),
             );
           }
 
           if (state.quests.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'No quests yet',
-                    style: TextStyle(color: Colors.white70, fontSize: 16),
-                  ),
-                  const SizedBox(height: 12),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                    ),
-                    onPressed: () => context.go(AppRoutes.questCreate),
-                    child: const Text('Create your first quest'),
-                  )
-                ],
-              ),
+            return EmptyStateWidget(
+              icon: Icons.assignment_outlined,
+              title: 'No quests yet',
+              message: 'Start your journey by creating your first quest!',
+              actionLabel: 'Create Quest',
+              onAction: () => context.go(AppRoutes.questCreate),
             );
           }
 
@@ -96,6 +85,12 @@ class _QuestListScreenState extends State<QuestListScreen> {
             child: FutureBuilder<List<RecommendedQuest>>(
               future: sl<QuestRecommendationService>().getRecommendedQuests(limit: 5),
               builder: (context, recSnapshot) {
+                // Handle error state silently - recommendations are optional
+                if (recSnapshot.hasError) {
+                  // Log error but don't block UI
+                  Logger.debug('Failed to load recommendations: ${recSnapshot.error}');
+                }
+                
                 return CustomScrollView(
                   slivers: [
                     // Recommended Quests Section

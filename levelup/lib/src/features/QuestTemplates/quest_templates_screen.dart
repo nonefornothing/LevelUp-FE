@@ -87,8 +87,8 @@ class _QuestTemplatesScreenState extends State<QuestTemplatesScreen> {
     final result = await questRepository.createQuest(quest);
 
     if (result is ResultError<Quest>) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result.message),
             backgroundColor: Colors.red,

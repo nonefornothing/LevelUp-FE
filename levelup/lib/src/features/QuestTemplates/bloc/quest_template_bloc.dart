@@ -2,7 +2,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/services/quest_template_service.dart';
 import '../../../../core/utils/result.dart';
-import '../../../../domain/entities/quest.dart';
 import '../../../../domain/entities/quest_template.dart';
 import 'quest_template_event.dart';
 import 'quest_template_state.dart';
@@ -30,12 +29,8 @@ class QuestTemplateBloc
     emit(const QuestTemplateLoading());
 
     final result = await _service.getQuestTemplates();
-    if (result is ResultError) {
-      emit(QuestTemplateError(
-        result is ResultError<dynamic>
-            ? result.message
-            : 'Failed to load quest templates',
-      ));
+    if (result is ResultError<List<QuestTemplate>>) {
+      emit(QuestTemplateError(result.message));
       return;
     }
 
@@ -58,12 +53,8 @@ class QuestTemplateBloc
     Emitter<QuestTemplateState> emit,
   ) async {
     final result = await _service.getFeaturedQuestTemplates();
-    if (result is ResultError) {
-      emit(QuestTemplateError(
-        result is ResultError<dynamic>
-            ? result.message
-            : 'Failed to load featured quest templates',
-      ));
+    if (result is ResultError<List<QuestTemplate>>) {
+      emit(QuestTemplateError(result.message));
       return;
     }
 
@@ -93,12 +84,8 @@ class QuestTemplateBloc
     emit(const QuestTemplateLoading());
 
     final result = await _service.searchQuestTemplates(event.query);
-    if (result is ResultError) {
-      emit(QuestTemplateError(
-        result is ResultError<dynamic>
-            ? result.message
-            : 'Failed to search quest templates',
-      ));
+    if (result is ResultError<List<QuestTemplate>>) {
+      emit(QuestTemplateError(result.message));
       return;
     }
 
@@ -125,12 +112,8 @@ class QuestTemplateBloc
     emit(const QuestTemplateLoading());
 
     final result = await _service.getQuestTemplatesByCategory(event.category);
-    if (result is ResultError) {
-      emit(QuestTemplateError(
-        result is ResultError<dynamic>
-            ? result.message
-            : 'Failed to filter quest templates',
-      ));
+    if (result is ResultError<List<QuestTemplate>>) {
+      emit(QuestTemplateError(result.message));
       return;
     }
 

@@ -17,6 +17,8 @@ class AppRoutes {
   static const String notificationPreferences = '/notifications/preferences';
   static const String friends = '/friends';
   static const String questTemplates = '/quest-templates';
+  static const String streaks = '/streaks';
+  static const String skills = '/skills';
 }
 
 

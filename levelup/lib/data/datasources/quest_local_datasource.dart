@@ -18,20 +18,24 @@ class QuestLocalDataSourceImpl implements QuestLocalDataSource {
 
   @override
   Future<List<Quest>> getQuests({QuestType? type, QuestStatus? status}) async {
-    final all = _box.values.map((m) => m.toDomain()).toList(growable: false);
-
-    Iterable<Quest> filtered = all;
+    // Filter at the model level before converting to domain objects for better performance
+    Iterable<QuestHiveModel> models = _box.values;
+    
     if (type != null) {
-      filtered = filtered.where((q) => q.type == type);
+      final typeIndex = type.index;
+      models = models.where((m) => m.typeIndex == typeIndex);
     }
     if (status != null) {
-      filtered = filtered.where((q) => q.status == status);
+      final statusIndex = status.index;
+      models = models.where((m) => m.statusIndex == statusIndex);
     }
 
+    // Convert to domain objects and sort
+    final quests = models.map((m) => m.toDomain()).toList(growable: false);
+    
     // Default sort: newest first
-    final list = filtered.toList(growable: false);
-    list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    return list;
+    quests.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return quests;
   }
 
   @override

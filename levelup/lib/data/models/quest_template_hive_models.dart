@@ -231,7 +231,7 @@ class QuestTemplateHiveModelAdapter
     return QuestTemplateHiveModel(
       id: reader.readString(),
       title: reader.readString(),
-      description: reader.readStringOrNull(),
+      description: reader.readBool() ? reader.readString() : null,
       typeIndex: reader.readInt(),
       categoryIndex: reader.readInt(),
       difficulty: reader.readInt(),
@@ -239,9 +239,9 @@ class QuestTemplateHiveModelAdapter
       currency: reader.readInt(),
       tasks: reader.readList().cast<QuestTemplateTaskHiveModel>(),
       milestones: reader.readList().cast<QuestTemplateMilestoneHiveModel>(),
-      estimatedDurationDays: reader.readIntOrNull(),
+      estimatedDurationDays: reader.readBool() ? reader.readInt() : null,
       requiredLevel: reader.readInt(),
-      iconName: reader.readStringOrNull(),
+      iconName: reader.readBool() ? reader.readString() : null,
       tags: reader.readList().cast<String>(),
       isFeatured: reader.readBool(),
       createdAtMillis: reader.readInt(),
@@ -252,7 +252,8 @@ class QuestTemplateHiveModelAdapter
   void write(BinaryWriter writer, QuestTemplateHiveModel obj) {
     writer.writeString(obj.id);
     writer.writeString(obj.title);
-    writer.writeStringOrNull(obj.description);
+    writer.writeBool(obj.description != null);
+    if (obj.description != null) writer.writeString(obj.description!);
     writer.writeInt(obj.typeIndex);
     writer.writeInt(obj.categoryIndex);
     writer.writeInt(obj.difficulty);
@@ -260,9 +261,11 @@ class QuestTemplateHiveModelAdapter
     writer.writeInt(obj.currency);
     writer.writeList(obj.tasks);
     writer.writeList(obj.milestones);
-    writer.writeIntOrNull(obj.estimatedDurationDays);
+    writer.writeBool(obj.estimatedDurationDays != null);
+    if (obj.estimatedDurationDays != null) writer.writeInt(obj.estimatedDurationDays!);
     writer.writeInt(obj.requiredLevel);
-    writer.writeStringOrNull(obj.iconName);
+    writer.writeBool(obj.iconName != null);
+    if (obj.iconName != null) writer.writeString(obj.iconName!);
     writer.writeList(obj.tags);
     writer.writeBool(obj.isFeatured);
     writer.writeInt(obj.createdAtMillis);
@@ -279,7 +282,7 @@ class QuestTemplateTaskHiveModelAdapter
     return QuestTemplateTaskHiveModel(
       id: reader.readString(),
       title: reader.readString(),
-      description: reader.readStringOrNull(),
+      description: reader.readBool() ? reader.readString() : null,
       orderIndex: reader.readInt(),
     );
   }
@@ -288,7 +291,8 @@ class QuestTemplateTaskHiveModelAdapter
   void write(BinaryWriter writer, QuestTemplateTaskHiveModel obj) {
     writer.writeString(obj.id);
     writer.writeString(obj.title);
-    writer.writeStringOrNull(obj.description);
+    writer.writeBool(obj.description != null);
+    if (obj.description != null) writer.writeString(obj.description!);
     writer.writeInt(obj.orderIndex);
   }
 }
@@ -303,7 +307,7 @@ class QuestTemplateMilestoneHiveModelAdapter
     return QuestTemplateMilestoneHiveModel(
       id: reader.readString(),
       title: reader.readString(),
-      description: reader.readStringOrNull(),
+      description: reader.readBool() ? reader.readString() : null,
       experience: reader.readInt(),
       currency: reader.readInt(),
       orderIndex: reader.readInt(),
@@ -314,7 +318,8 @@ class QuestTemplateMilestoneHiveModelAdapter
   void write(BinaryWriter writer, QuestTemplateMilestoneHiveModel obj) {
     writer.writeString(obj.id);
     writer.writeString(obj.title);
-    writer.writeStringOrNull(obj.description);
+    writer.writeBool(obj.description != null);
+    if (obj.description != null) writer.writeString(obj.description!);
     writer.writeInt(obj.experience);
     writer.writeInt(obj.currency);
     writer.writeInt(obj.orderIndex);

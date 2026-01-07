@@ -6,7 +6,10 @@ import '../../../core/services/achievement_service.dart';
 import '../../../core/services/weekly_challenge_service.dart';
 import '../../../core/services/inventory_service.dart';
 import '../../../core/services/notification_service.dart';
+import '../../../core/services/streak_service.dart';
+import '../../../core/services/skill_service.dart';
 import '../../../core/utils/result.dart';
+import '../../../core/utils/logger.dart';
 import '../../../domain/entities/achievement.dart';
 import '../../../domain/entities/player.dart';
 import '../../../domain/entities/quest.dart';
@@ -93,6 +96,12 @@ class _RewardClaimScreenState extends State<RewardClaimScreen> {
     // Award items based on quest completion (random chance for collectibles)
     await _awardItems(levelUp);
 
+    // Update streaks
+    await _updateStreaks();
+
+    // Award skill experience
+    await _awardSkillExperience();
+
     // Create notifications
     await _createNotifications(p, levelUp);
 
@@ -177,7 +186,7 @@ class _RewardClaimScreenState extends State<RewardClaimScreen> {
       }
     } catch (e) {
       // Fail silently - achievement checking is not critical
-      print('Warning: Failed to check achievements: $e');
+      Logger.warning('Failed to check achievements: $e');
     }
   }
 
@@ -203,7 +212,7 @@ class _RewardClaimScreenState extends State<RewardClaimScreen> {
       }
     } catch (e) {
       // Fail silently - weekly challenge tracking is not critical
-      print('Warning: Failed to update weekly challenges: $e');
+      Logger.warning('Failed to update weekly challenges: $e');
     }
   }
 
@@ -244,7 +253,82 @@ class _RewardClaimScreenState extends State<RewardClaimScreen> {
       }
     } catch (e) {
       // Fail silently - item rewards are bonus
-      print('Warning: Failed to award items: $e');
+      Logger.warning('Failed to award items: $e');
+    }
+  }
+
+  Future<void> _updateStreaks() async {
+    try {
+      final streakService = sl<StreakService>();
+      final questRepository = sl<QuestRepository>();
+      
+      // Get the completed quest to determine its type
+      final questResult = await questRepository.getQuestById(widget.args.questId);
+      if (questResult is Success<Quest>) {
+        final quest = questResult.data;
+        final completionDate = quest.completedAt ?? DateTime.now();
+        
+        // Update streaks based on quest completion
+        final streakResult = await streakService.updateStreakOnQuestCompletion(
+          questType: quest.type,
+          completionDate: completionDate,
+        );
+        
+        if (streakResult is Success<StreakUpdateResult>) {
+          final updateResult = streakResult.data;
+          // Optionally show streak notification if new record
+          if (updateResult.newRecord && updateResult.streaks.isNotEmpty) {
+            final longestStreak = updateResult.streaks
+                .map((s) => s.currentStreak)
+                .reduce((a, b) => a > b ? a : b);
+            // Could show a snackbar or notification here
+            Logger.info('New streak record: $longestStreak days!');
+          }
+        }
+      }
+    } catch (e) {
+      // Fail silently - streak tracking is not critical
+      Logger.warning('Failed to update streaks: $e');
+    }
+  }
+
+  Future<void> _awardSkillExperience() async {
+    try {
+      final skillService = sl<SkillService>();
+      final questRepository = sl<QuestRepository>();
+      
+      // Get the completed quest
+      final questResult = await questRepository.getQuestById(widget.args.questId);
+      if (questResult is Success<Quest>) {
+        final quest = questResult.data;
+        
+        // Award skill experience based on quest category
+        await skillService.awardSkillExperienceFromQuest(quest);
+      }
+    } catch (e) {
+      // Fail silently - skill progression is not critical
+      Logger.warning('Failed to award skill experience: $e');
+    }
+  }
+
+  Future<void> _createNotifications(Player? player, bool levelUp) async {
+    try {
+      final notificationService = sl<NotificationService>();
+      
+      // Create notification for quest completion
+      await notificationService.notifyQuestCompletion(
+        widget.args.questTitle,
+        widget.args.experience,
+        widget.args.currency,
+      );
+      
+      // Create notification for level up if applicable
+      if (levelUp && player != null) {
+        await notificationService.notifyLevelUp(player.level);
+      }
+    } catch (e) {
+      // Fail silently - notifications are not critical
+      Logger.warning('Failed to create notifications: $e');
     }
   }
 

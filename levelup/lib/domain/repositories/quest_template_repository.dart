@@ -1,4 +1,5 @@
 import '../../core/utils/result.dart';
+import '../entities/quest.dart';
 import '../entities/quest_template.dart';
 
 /// Repository interface for Quest Templates

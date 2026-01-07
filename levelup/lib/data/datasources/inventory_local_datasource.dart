@@ -1,7 +1,6 @@
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../domain/entities/inventory.dart';
-import '../../domain/entities/item.dart';
 import '../models/item_hive_models.dart';
 import 'local_storage.dart';
 

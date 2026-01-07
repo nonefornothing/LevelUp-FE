@@ -29,7 +29,7 @@ class QuestTemplateService {
         final existing = existingResult.data;
         // If templates already exist, don't reinitialize
         if (existing.isNotEmpty) {
-          return Result.success(null);
+          return const Success<void>(null);
         }
       }
 
@@ -37,7 +37,7 @@ class QuestTemplateService {
       final saveResult = await _saveTemplates(templates);
       return saveResult;
     } catch (e) {
-      return Result.error('Failed to initialize quest templates: $e');
+      return ResultError<void>('Failed to initialize quest templates: $e');
     }
   }
 

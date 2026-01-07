@@ -19,9 +19,9 @@ class QuestTemplateLocalDataSource {
   Future<Result<List<QuestTemplate>>> getQuestTemplates() async {
     try {
       final templates = _box.values.map((model) => model.toDomain()).toList();
-      return Result.success(templates);
+      return Success<List<QuestTemplate>>(templates);
     } catch (e) {
-      return Result.error('Failed to get quest templates: $e');
+      return ResultError<List<QuestTemplate>>('Failed to get quest templates: $e');
     }
   }
 
@@ -29,9 +29,9 @@ class QuestTemplateLocalDataSource {
   Future<Result<QuestTemplate?>> getQuestTemplateById(String id) async {
     try {
       final model = _box.get(id);
-      return Result.success(model?.toDomain());
+      return Success<QuestTemplate?>(model?.toDomain());
     } catch (e) {
-      return Result.error('Failed to get quest template: $e');
+      return ResultError<QuestTemplate?>('Failed to get quest template: $e');
     }
   }
 
@@ -52,9 +52,9 @@ class QuestTemplateLocalDataSource {
         await _box.put(model.id, model);
       }
 
-      return Result.success(null);
+      return const Success<void>(null);
     } catch (e) {
-      return Result.error('Failed to save quest templates: $e');
+      return ResultError<void>('Failed to save quest templates: $e');
     }
   }
 
@@ -72,9 +72,9 @@ class QuestTemplateLocalDataSource {
             template.tags.any((tag) => tag.toLowerCase().contains(lowerQuery));
       }).toList();
 
-      return Result.success(filtered);
+      return Success<List<QuestTemplate>>(filtered);
     } catch (e) {
-      return Result.error('Failed to search quest templates: $e');
+      return ResultError<List<QuestTemplate>>('Failed to search quest templates: $e');
     }
   }
 
@@ -87,9 +87,9 @@ class QuestTemplateLocalDataSource {
       final filtered = allTemplates
           .where((template) => template.category == category)
           .toList();
-      return Result.success(filtered);
+      return Success<List<QuestTemplate>>(filtered);
     } catch (e) {
-      return Result.error('Failed to get quest templates by category: $e');
+      return ResultError<List<QuestTemplate>>('Failed to get quest templates by category: $e');
     }
   }
 
@@ -100,9 +100,9 @@ class QuestTemplateLocalDataSource {
       final featured = allTemplates
           .where((template) => template.isFeatured)
           .toList();
-      return Result.success(featured);
+      return Success<List<QuestTemplate>>(featured);
     } catch (e) {
-      return Result.error('Failed to get featured quest templates: $e');
+      return ResultError<List<QuestTemplate>>('Failed to get featured quest templates: $e');
     }
   }
 
@@ -115,9 +115,9 @@ class QuestTemplateLocalDataSource {
       final filtered = allTemplates.where((template) {
         return tags.any((tag) => template.tags.contains(tag));
       }).toList();
-      return Result.success(filtered);
+      return Success<List<QuestTemplate>>(filtered);
     } catch (e) {
-      return Result.error('Failed to get quest templates by tags: $e');
+      return ResultError<List<QuestTemplate>>('Failed to get quest templates by tags: $e');
     }
   }
 }

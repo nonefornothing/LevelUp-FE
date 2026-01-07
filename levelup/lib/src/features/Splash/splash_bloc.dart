@@ -17,19 +17,29 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
         _onboardingRepository = onboardingRepository,
         super(SplashInitial()) {
     on<SplashStarted>((event, emit) async {
-      // Keep a short splash delay for UX
-      await Future.delayed(const Duration(seconds: 2));
+      // Check onboarding and auth status in parallel for faster startup
+      final results = await Future.wait([
+        _onboardingRepository.isCompleted(),
+        _authRepository.isLoggedIn(),
+      ]);
 
-      final onboardingResult = await _onboardingRepository.isCompleted();
+      final onboardingResult = results[0];
+      final loggedInResult = results[1];
+      
       final onboardingDone = onboardingResult is Success<bool> && onboardingResult.data;
+      final loggedIn = loggedInResult is Success<bool> && loggedInResult.data;
+
+      // Only add minimal delay if we need to show splash screen
+      // Otherwise navigate immediately
+      if (!onboardingDone || !loggedIn) {
+        // Minimal delay for UX (reduced from 2 seconds to 500ms)
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
 
       if (!onboardingDone) {
         emit(SplashRouteDecision(AppRoutes.onboarding));
         return;
       }
-
-      final loggedInResult = await _authRepository.isLoggedIn();
-      final loggedIn = loggedInResult is Success<bool> && loggedInResult.data;
 
       emit(SplashRouteDecision(loggedIn ? AppRoutes.home : AppRoutes.login));
     });
